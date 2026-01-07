@@ -1,0 +1,58 @@
+# LLM Evaluation Framework Configuration
+# Example configuration file for running evaluations
+
+# Path to the benchmark dataset
+dataset_path: benchmarks/rag_benchmark.jsonl
+
+# Output directory for reports and visualizations
+output_dir: results
+
+# Models to evaluate
+models:
+  - name: gpt-4
+    output_path: examples/model_outputs_gpt4.jsonl
+    description: OpenAI GPT-4 model outputs
+  
+  - name: llama-3.1
+    output_path: examples/model_outputs_llama.jsonl
+    description: Meta Llama 3.1 model outputs
+
+# Metrics configuration
+metrics:
+  # Reference-based metrics
+  bleu: true
+  rouge_l: true
+  bertscore: true
+  
+  # RAG-specific metrics
+  faithfulness: true
+  context_relevancy: true
+  answer_relevancy: true
+  
+  # LLM-as-a-Judge (requires API key)
+  llm_judge: true
+
+# LLM Judge configuration
+judge:
+  # Provider: 'openai', 'anthropic', or 'groq'
+  provider: groq
+  
+  # Model to use for evaluation
+  model: llama-3.3-70b-versatile
+  
+  # Temperature (0 = deterministic)
+  temperature: 0.0
+  
+  # Maximum retry attempts for API calls
+  max_retries: 3
+  
+  # Evaluation dimensions
+  rubric_dimensions:
+    - coherence
+    - relevance
+    - safety
+
+# Execution options
+verbose: false
+batch_size: 32
+num_workers: 1

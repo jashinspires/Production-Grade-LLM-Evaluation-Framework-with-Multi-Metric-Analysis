@@ -1,0 +1,100 @@
+# LLM Evaluation Framework - Docker Compose Configuration
+version: '3.8'
+
+services:
+  llm-eval:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: llm-eval
+
+    # Environment variables
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - PYTHONPATH=/app/src
+
+    # Volume mounts
+    volumes:
+      - ./benchmarks:/app/benchmarks:ro
+      - ./examples:/app/examples:ro
+      - ./results:/app/results:rw
+
+    # Working directory
+    working_dir: /app
+
+    # Health check
+    healthcheck:
+      test: [ "CMD", "python", "-c", "from llm_eval import __version__; print(__version__)" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Default command - run evaluation
+    command: >
+      llm-eval run  --config examples/config.yaml  --output-dir results/ --no-progress
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: llm-eval-test
+
+    environment:
+      - OPENAI_API_KEY=test-key
+      - ANTHROPIC_API_KEY=test-key
+      - GROQ_API_KEY=test-key
+
+    volumes:
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./benchmarks:/app/benchmarks:ro
+      - ./examples:/app/examples:ro
+      - ./coverage:/app/coverage:rw
+
+    working_dir: /app
+
+    command: pytest tests/ -v --cov=llm_eval --cov-report=html:coverage/html --cov-report=term
+
+    profiles:
+      - test
+
+  # Linting service
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+    container_name: llm-eval-lint
+
+    volumes:
+      - ./src:/app/src:ro
+
+    working_dir: /app
+
+    command: >
+      sh -c "
+        echo 'Running Black...' && black --check src/ &&
+        echo 'Running isort...' && isort --check-only src/ &&
+        echo 'Running flake8...' && flake8 src/ --max-line-length=100 &&
+        echo 'All checks passed!'
+      "
+
+    profiles:
+      - lint
+
+# Named volumes for persistence
+volumes:
+  results:
+  coverage:
+
+    # Network configuration
+networks:
+  default:
+    name: llm-eval-network
