@@ -58,7 +58,7 @@ IMPORTANT: Output ONLY the JSON object, no additional text.
 class JudgeResult:
     """
     Result of an LLM-as-a-Judge evaluation.
-    
+
     Attributes:
         scores: Dictionary of dimension scores (normalized 0-1)
         raw_scores: Original scores from the judge (1-5 scale)
@@ -66,24 +66,25 @@ class JudgeResult:
         overall_assessment: Overall assessment text
         error: Error message if evaluation failed
     """
+
     scores: Dict[str, float] = field(default_factory=dict)
     raw_scores: Dict[str, int] = field(default_factory=dict)
     reasoning: Dict[str, str] = field(default_factory=dict)
     overall_assessment: str = ""
     error: Optional[str] = None
-    
+
     @property
     def is_valid(self) -> bool:
         """Check if the result is valid (no error)."""
         return self.error is None and len(self.scores) > 0
-    
+
     @property
     def average_score(self) -> float:
         """Calculate average normalized score across dimensions."""
         if not self.scores:
             return 0.0
         return sum(self.scores.values()) / len(self.scores)
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert result to dictionary."""
         return {
@@ -99,14 +100,14 @@ class JudgeResult:
 class Judge(ABC):
     """
     Abstract base class for LLM-as-a-Judge implementations.
-    
+
     All judge implementations must inherit from this class and
     implement the _call_llm() method.
     """
-    
+
     # Default rubric dimensions
     DEFAULT_DIMENSIONS = ["coherence", "relevance", "safety"]
-    
+
     def __init__(
         self,
         model: str,
@@ -114,11 +115,11 @@ class Judge(ABC):
         max_retries: int = 3,
         dimensions: Optional[List[str]] = None,
         custom_rubric: Optional[str] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> None:
         """
         Initialize the judge.
-        
+
         Args:
             model: Model identifier for the LLM
             temperature: Sampling temperature (0 = deterministic)
@@ -133,82 +134,82 @@ class Judge(ABC):
         self.dimensions = dimensions or self.DEFAULT_DIMENSIONS
         self.rubric = custom_rubric or DEFAULT_RUBRIC
         self.config = kwargs
-    
+
     @abstractmethod
     def _call_llm(self, prompt: str) -> str:
         """
         Make an API call to the LLM.
-        
+
         Args:
             prompt: The evaluation prompt
-            
+
         Returns:
             Raw response text from the LLM
-            
+
         Raises:
             Exception: If API call fails
         """
         pass
-    
+
     def _build_prompt(
         self,
         query: str,
         answer: str,
         contexts: Optional[List[str]] = None,
-        reference: Optional[str] = None
+        reference: Optional[str] = None,
     ) -> str:
         """
         Build the evaluation prompt.
-        
+
         Args:
             query: The original query
             answer: The model's answer to evaluate
             contexts: Optional retrieved contexts
             reference: Optional reference answer
-            
+
         Returns:
             Complete evaluation prompt
         """
         prompt_parts = [self.rubric, "\n---\n"]
-        
+
         prompt_parts.append(f"**Query**: {query}\n")
-        
+
         if contexts:
             prompt_parts.append("**Retrieved Contexts**:\n")
             for i, ctx in enumerate(contexts, 1):
                 prompt_parts.append(f"{i}. {ctx}\n")
             prompt_parts.append("\n")
-        
+
         if reference:
             prompt_parts.append(f"**Expected Answer**: {reference}\n\n")
-        
+
         prompt_parts.append(f"**Response to Evaluate**: {answer}\n")
-        
+
         return "".join(prompt_parts)
-    
+
     def _parse_response(self, response: str) -> JudgeResult:
         """
         Parse the LLM's JSON response.
-        
+
         Args:
             response: Raw response from the LLM
-            
+
         Returns:
             Parsed JudgeResult
         """
         try:
             # Try to extract JSON from the response
-            json_match = re.search(r'\{[\s\S]*\}', response)
+            json_match = re.search(r"\{[\s\S]*\}", response)
             if not json_match:
                 return JudgeResult(error=f"No JSON found in response: {response[:200]}")
-            
+
             json_str = json_match.group()
             data = json.loads(json_str)
-            
+
             scores = {}
             raw_scores = {}
             reasoning = {}
-            
+
             for dim in self.dimensions:
                 if dim in data:
                     dim_data = data[dim]
@@ -222,65 +223,65 @@ class Judge(ABC):
                         scores[dim] = (raw_score - 1) / 4
                         raw_scores[dim] = int(raw_score)
                         reasoning[dim] = ""
-            
+
             overall = data.get("overall_assessment", "")
-            
+
             return JudgeResult(
                 scores=scores,
                 raw_scores=raw_scores,
                 reasoning=reasoning,
-                overall_assessment=overall
+                overall_assessment=overall,
             )
-            
+
         except json.JSONDecodeError as e:
             return JudgeResult(error=f"Failed to parse JSON: {e}")
         except Exception as e:
             return JudgeResult(error=f"Error parsing response: {e}")
-    
+
     def evaluate(
         self,
         query: str,
         answer: str,
         contexts: Optional[List[str]] = None,
-        reference: Optional[str] = None
+        reference: Optional[str] = None,
     ) -> JudgeResult:
         """
         Evaluate an answer using the LLM judge.
-        
+
         Args:
             query: The original query
             answer: The model's answer to evaluate
             contexts: Optional retrieved contexts
             reference: Optional reference answer
-            
+
         Returns:
             JudgeResult with scores and reasoning
         """
         if not query or not answer:
             return JudgeResult(error="Query and answer are required")
-        
+
         prompt = self._build_prompt(query, answer, contexts, reference)
-        
+
         last_error = None
         for attempt in range(self.max_retries):
             try:
                 response = self._call_llm(prompt)
                 result = self._parse_response(response)
-                
+
                 if result.is_valid:
                     return result
-                
-                logger.warning(
-                    f"Attempt {attempt + 1}: Invalid response - {result.error}"
-                )
+
+                logger.warning(f"Attempt {attempt + 1}: Invalid response - {result.error}")
                 last_error = result.error
-                
+
             except Exception as e:
                 logger.warning(f"Attempt {attempt + 1} failed: {e}")
                 last_error = str(e)
-        
-        return JudgeResult(error=f"All {self.max_retries} attempts failed. Last error: {last_error}")
-    
+
+        return JudgeResult(
+            error=f"All {self.max_retries} attempts failed. Last error: {last_error}"
+        )
+
     def __repr__(self) -> str:
         """String representation of the judge."""
         return f"{self.__class__.__name__}(model='{self.model}')"

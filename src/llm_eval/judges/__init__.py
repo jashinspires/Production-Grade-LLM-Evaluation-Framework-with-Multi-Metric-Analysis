@@ -5,10 +5,10 @@ Provides judge implementations for multi-dimensional evaluation
 using various LLM providers.
 """
 
-from llm_eval.judges.base import Judge, JudgeResult
-from llm_eval.judges.openai_judge import OpenAIJudge
 from llm_eval.judges.anthropic_judge import AnthropicJudge
+from llm_eval.judges.base import Judge, JudgeResult
 from llm_eval.judges.groq_judge import GroqJudge
+from llm_eval.judges.openai_judge import OpenAIJudge
 
 __all__ = [
     "Judge",
@@ -22,14 +22,14 @@ __all__ = [
 def create_judge(provider: str, **kwargs) -> Judge:
     """
     Factory function to create a judge based on provider.
-    
+
     Args:
         provider: LLM provider name ('openai', 'anthropic', 'groq')
         **kwargs: Configuration options for the judge
-        
+
     Returns:
         Configured judge instance
-        
+
     Raises:
         ValueError: If provider is not supported
     """
@@ -38,12 +38,11 @@ def create_judge(provider: str, **kwargs) -> Judge:
         "anthropic": AnthropicJudge,
         "groq": GroqJudge,
     }
-    
+
     provider_lower = provider.lower()
     if provider_lower not in providers:
         raise ValueError(
-            f"Unknown provider: {provider}. "
-            f"Available providers: {list(providers.keys())}"
+            f"Unknown provider: {provider}. " f"Available providers: {list(providers.keys())}"
         )
-    
+
     return providers[provider_lower](**kwargs)

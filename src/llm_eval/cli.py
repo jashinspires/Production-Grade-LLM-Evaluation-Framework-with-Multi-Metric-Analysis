@@ -16,7 +16,7 @@ from rich.table import Table
 from llm_eval import __version__
 from llm_eval.config import EvaluationConfig
 from llm_eval.pipeline import EvaluationPipeline
-from llm_eval.utils.logging import setup_logging, get_logger
+from llm_eval.utils.logging import get_logger, setup_logging
 
 # Create Typer app
 app = typer.Typer(
@@ -49,7 +49,7 @@ def main(
 ) -> None:
     """
     LLM Evaluation Framework - Production-grade evaluation for RAG/QA systems.
-    
+
     Use 'llm-eval run' to execute evaluations.
     """
     pass
@@ -101,53 +101,58 @@ def run(
 ) -> None:
     """
     Run LLM evaluation pipeline.
-    
+
     Loads configuration, evaluates models, and generates reports.
-    
+
     Example:
         llm-eval run --config examples/config.yaml --output-dir results/
     """
     # Setup logging
     setup_logging(verbose=verbose)
-    
-    console.print(Panel.fit(
-        "[bold blue]LLM Evaluation Framework[/bold blue]\n"
-        f"Version: {__version__}",
-        title="Starting Evaluation"
-    ))
-    
+
+    console.print(
+        Panel.fit(
+            "[bold blue]LLM Evaluation Framework[/bold blue]\n" f"Version: {__version__}",
+            title="Starting Evaluation",
+        )
+    )
+
     try:
         # Load configuration
         console.print(f"\n[bold]Loading configuration from:[/bold] {config}")
         eval_config = EvaluationConfig.from_file(config)
-        
+
         # Override output directory if specified
         if output_dir:
             eval_config.output_dir = output_dir
             console.print(f"[bold]Output directory:[/bold] {output_dir}")
-        
+
         # Override verbose setting
         if verbose:
             eval_config.verbose = True
-        
+
         # Filter models if specified
         if models:
             model_names = [m.strip() for m in models]
-            eval_config.models = [
-                m for m in eval_config.models
-                if m.name in model_names
-            ]
+            eval_config.models = [m for m in eval_config.models if m.name in model_names]
             if not eval_config.models:
                 console.print(f"[red]Error:[/red] No matching models found: {model_names}")
                 raise typer.Exit(code=1)
             console.print(f"[bold]Evaluating models:[/bold] {model_names}")
-        
+
         # Override metrics if specified
         if metrics:
             metric_names = [m.strip().lower() for m in metrics]
-            valid_metrics = {"bleu", "rouge_l", "bertscore", "faithfulness", 
-                           "context_relevancy", "answer_relevancy", "llm_judge"}
-            
+            valid_metrics = {
+                "bleu",
+                "rouge_l",
+                "bertscore",
+                "faithfulness",
+                "context_relevancy",
+                "answer_relevancy",
+                "llm_judge",
+            }
+
             # Disable all metrics first
             eval_config.metrics.bleu = False
             eval_config.metrics.rouge_l = False
@@ -156,7 +161,7 @@ def run(
             eval_config.metrics.context_relevancy = False
             eval_config.metrics.answer_relevancy = False
             eval_config.metrics.llm_judge = False
-            
+
             # Enable selected metrics
             for m in metric_names:
                 if m == "bleu":
@@ -175,29 +180,29 @@ def run(
                     eval_config.metrics.llm_judge = True
                 else:
                     console.print(f"[yellow]Warning:[/yellow] Unknown metric: {m}")
-            
+
             console.print(f"[bold]Computing metrics:[/bold] {metric_names}")
-        
+
         # Display configuration summary
         _display_config_summary(eval_config)
-        
+
         # Create and run pipeline
         pipeline = EvaluationPipeline(eval_config)
         results = pipeline.run(show_progress=not no_progress)
-        
+
         # Display summary
         _display_results_summary(results, eval_config.output_dir)
-        
+
         console.print("\n[bold green]✓ Evaluation completed successfully![/bold green]")
-        
+
     except FileNotFoundError as e:
         console.print(f"[red]Error:[/red] File not found: {e}")
         raise typer.Exit(code=1)
-    
+
     except ValueError as e:
         console.print(f"[red]Configuration error:[/red] {e}")
         raise typer.Exit(code=1)
-    
+
     except Exception as e:
         console.print(f"[red]Error during evaluation:[/red] {e}")
         if verbose:
@@ -217,17 +222,17 @@ def validate(
 ) -> None:
     """
     Validate a configuration file without running evaluation.
-    
+
     Checks for syntax errors and validates all paths and settings.
     """
     console.print(f"[bold]Validating configuration:[/bold] {config}")
-    
+
     try:
         eval_config = EvaluationConfig.from_file(config)
-        
+
         console.print("[green]✓ Configuration is valid![/green]")
         _display_config_summary(eval_config)
-        
+
     except Exception as e:
         console.print(f"[red]✗ Configuration error:[/red] {e}")
         raise typer.Exit(code=1)
@@ -237,12 +242,12 @@ def validate(
 def list_metrics() -> None:
     """List all available metrics."""
     from llm_eval.metrics import MetricFactory
-    
+
     table = Table(title="Available Metrics")
     table.add_column("Name", style="cyan")
     table.add_column("Type", style="magenta")
     table.add_column("Description")
-    
+
     metric_info = {
         "bleu": ("Reference-based", "BLEU score measuring n-gram precision"),
         "rouge_l": ("Reference-based", "ROUGE-L score measuring LCS overlap"),
@@ -251,14 +256,16 @@ def list_metrics() -> None:
         "context_relevancy": ("RAG-specific", "Measures context-query relevance"),
         "answer_relevancy": ("RAG-specific", "Measures answer-query alignment"),
     }
-    
+
     for name in MetricFactory.list_metrics():
         info = metric_info.get(name, ("Custom", "Custom metric"))
         table.add_row(name, info[0], info[1])
-    
+
     # Add judge info
-    table.add_row("llm_judge", "LLM-as-a-Judge", "Multi-dimensional evaluation (coherence, relevance, safety)")
-    
+    table.add_row(
+        "llm_judge", "LLM-as-a-Judge", "Multi-dimensional evaluation (coherence, relevance, safety)"
+    )
+
     console.print(table)
 
 
@@ -267,11 +274,11 @@ def _display_config_summary(config: EvaluationConfig) -> None:
     table = Table(title="Configuration Summary", show_header=False)
     table.add_column("Setting", style="cyan")
     table.add_column("Value")
-    
+
     table.add_row("Dataset", str(config.dataset_path))
     table.add_row("Output Directory", str(config.output_dir))
     table.add_row("Models", ", ".join(m.name for m in config.models))
-    
+
     enabled_metrics = []
     if config.metrics.bleu:
         enabled_metrics.append("bleu")
@@ -287,59 +294,56 @@ def _display_config_summary(config: EvaluationConfig) -> None:
         enabled_metrics.append("answer_relevancy")
     if config.metrics.llm_judge:
         enabled_metrics.append("llm_judge")
-    
+
     table.add_row("Metrics", ", ".join(enabled_metrics))
-    
+
     if config.metrics.llm_judge:
         table.add_row("Judge Provider", config.judge.provider)
         table.add_row("Judge Model", config.judge.model)
-    
+
     console.print(table)
 
 
-def _display_results_summary(
-    results: dict,
-    output_dir: Path
-) -> None:
+def _display_results_summary(results: dict, output_dir: Path) -> None:
     """Display evaluation results summary."""
     console.print("\n[bold]Results Summary:[/bold]")
-    
+
     for model_name, model_results in results.items():
         examples = model_results.get("examples", [])
-        
+
         # Collect metric averages
         metric_scores = {}
         for example in examples:
             for metric_name, metric_result in example.get("metrics", {}).items():
                 if metric_name not in metric_scores:
                     metric_scores[metric_name] = []
-                
+
                 if isinstance(metric_result, dict):
                     score = metric_result.get("score", 0.0)
                 else:
                     score = float(metric_result) if metric_result else 0.0
-                
+
                 metric_scores[metric_name].append(score)
-        
+
         table = Table(title=f"Model: {model_name}")
         table.add_column("Metric", style="cyan")
         table.add_column("Mean Score", justify="right")
         table.add_column("Status")
-        
+
         for metric_name, scores in sorted(metric_scores.items()):
             mean_score = sum(scores) / len(scores) if scores else 0.0
-            
+
             if mean_score >= 0.8:
                 status = "[green]●[/green]"
             elif mean_score >= 0.6:
                 status = "[yellow]●[/yellow]"
             else:
                 status = "[red]●[/red]"
-            
+
             table.add_row(metric_name, f"{mean_score:.4f}", status)
-        
+
         console.print(table)
-    
+
     console.print(f"\n[bold]Reports saved to:[/bold] {output_dir}")
 
 

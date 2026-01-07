@@ -28,23 +28,21 @@ def sample_benchmark_data() -> List[Dict]:
             "expected_answer": "The capital of France is Paris.",
             "retrieved_contexts": [
                 "Paris is the capital and largest city of France.",
-                "France is a country in Western Europe."
-            ]
+                "France is a country in Western Europe.",
+            ],
         },
         {
             "query": "Who wrote Romeo and Juliet?",
             "expected_answer": "William Shakespeare wrote Romeo and Juliet.",
-            "retrieved_contexts": [
-                "Romeo and Juliet is a tragedy written by William Shakespeare."
-            ]
+            "retrieved_contexts": ["Romeo and Juliet is a tragedy written by William Shakespeare."],
         },
         {
             "query": "What is photosynthesis?",
             "expected_answer": "Photosynthesis is the process by which plants convert sunlight into glucose.",
             "retrieved_contexts": [
                 "Photosynthesis is a biological process used by plants to convert light energy."
-            ]
-        }
+            ],
+        },
     ]
 
 
@@ -54,16 +52,16 @@ def sample_model_outputs() -> List[Dict]:
     return [
         {
             "query": "What is the capital of France?",
-            "prediction": "Paris is the capital of France."
+            "prediction": "Paris is the capital of France.",
         },
         {
             "query": "Who wrote Romeo and Juliet?",
-            "prediction": "Shakespeare wrote Romeo and Juliet."
+            "prediction": "Shakespeare wrote Romeo and Juliet.",
         },
         {
             "query": "What is photosynthesis?",
-            "prediction": "Photosynthesis is how plants make food from sunlight."
-        }
+            "prediction": "Photosynthesis is how plants make food from sunlight.",
+        },
     ]
 
 
@@ -93,12 +91,7 @@ def sample_config(temp_dir, benchmark_file, model_output_file) -> Dict:
     return {
         "dataset_path": str(benchmark_file),
         "output_dir": str(temp_dir / "results"),
-        "models": [
-            {
-                "name": "test-model",
-                "output_path": str(model_output_file)
-            }
-        ],
+        "models": [{"name": "test-model", "output_path": str(model_output_file)}],
         "metrics": {
             "bleu": True,
             "rouge_l": True,
@@ -106,13 +99,9 @@ def sample_config(temp_dir, benchmark_file, model_output_file) -> Dict:
             "faithfulness": False,
             "context_relevancy": False,
             "answer_relevancy": False,
-            "llm_judge": False
+            "llm_judge": False,
         },
-        "judge": {
-            "provider": "groq",
-            "model": "llama-3.1-70b-versatile",
-            "temperature": 0.0
-        }
+        "judge": {"provider": "groq", "model": "llama-3.1-70b-versatile", "temperature": 0.0},
     }
 
 
@@ -120,6 +109,7 @@ def sample_config(temp_dir, benchmark_file, model_output_file) -> Dict:
 def config_file(temp_dir, sample_config) -> Path:
     """Create a config YAML file."""
     import yaml
+
     filepath = temp_dir / "config.yaml"
     with open(filepath, "w") as f:
         yaml.dump(sample_config, f)
@@ -133,12 +123,14 @@ def mock_openai_response():
     mock_response.choices = [
         MagicMock(
             message=MagicMock(
-                content=json.dumps({
-                    "coherence": {"score": 4, "reasoning": "Well structured"},
-                    "relevance": {"score": 5, "reasoning": "Directly addresses query"},
-                    "safety": {"score": 5, "reasoning": "No harmful content"},
-                    "overall_assessment": "Good response"
-                })
+                content=json.dumps(
+                    {
+                        "coherence": {"score": 4, "reasoning": "Well structured"},
+                        "relevance": {"score": 5, "reasoning": "Directly addresses query"},
+                        "safety": {"score": 5, "reasoning": "No harmful content"},
+                        "overall_assessment": "Good response",
+                    }
+                )
             )
         )
     ]
@@ -152,12 +144,14 @@ def mock_groq_response():
     mock_response.choices = [
         MagicMock(
             message=MagicMock(
-                content=json.dumps({
-                    "coherence": {"score": 4, "reasoning": "Clear and logical"},
-                    "relevance": {"score": 4, "reasoning": "Addresses the question"},
-                    "safety": {"score": 5, "reasoning": "Appropriate content"},
-                    "overall_assessment": "Solid response"
-                })
+                content=json.dumps(
+                    {
+                        "coherence": {"score": 4, "reasoning": "Clear and logical"},
+                        "relevance": {"score": 4, "reasoning": "Addresses the question"},
+                        "safety": {"score": 5, "reasoning": "Appropriate content"},
+                        "overall_assessment": "Solid response",
+                    }
+                )
             )
         )
     ]
