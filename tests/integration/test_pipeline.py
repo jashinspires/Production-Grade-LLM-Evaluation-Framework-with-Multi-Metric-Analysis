@@ -3,10 +3,6 @@ Integration tests for the full evaluation pipeline.
 """
 
 import json
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
 
 from llm_eval.config import EvaluationConfig
 from llm_eval.pipeline import EvaluationPipeline
@@ -185,7 +181,7 @@ class TestVisualizationGeneration:
         pipeline.run(show_progress=False)
 
         # Check for radar chart
-        radar_files = list(config.output_dir.glob("radar_chart*.png"))
+        list(config.output_dir.glob("radar_chart*.png"))  # Check exists
         # May not exist for single model, but check for any comparison chart
         comparison_files = list(config.output_dir.glob("*.png"))
         assert len(comparison_files) >= 1

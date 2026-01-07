@@ -4,12 +4,11 @@ Config models for the evaluation framework.
 Uses Pydantic for validation, supports YAML and JSON files.
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator
 from pydantic_settings import BaseSettings
 
 

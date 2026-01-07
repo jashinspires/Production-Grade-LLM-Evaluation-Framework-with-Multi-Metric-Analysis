@@ -4,7 +4,6 @@ CLI for running LLM evaluations.
 Built with Typer - supports run, validate, and list-metrics commands.
 """
 
-import sys
 from pathlib import Path
 from typing import List, Optional
 
@@ -143,15 +142,6 @@ def run(
         # Override metrics if specified
         if metrics:
             metric_names = [m.strip().lower() for m in metrics]
-            valid_metrics = {
-                "bleu",
-                "rouge_l",
-                "bertscore",
-                "faithfulness",
-                "context_relevancy",
-                "answer_relevancy",
-                "llm_judge",
-            }
 
             # Disable all metrics first
             eval_config.metrics.bleu = False

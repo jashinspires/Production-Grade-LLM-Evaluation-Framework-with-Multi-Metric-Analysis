@@ -5,7 +5,6 @@ Provides configurable logging with rich formatting for console output.
 """
 
 import logging
-import sys
 from typing import Optional
 
 from rich.console import Console

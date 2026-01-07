@@ -10,7 +10,7 @@ from typing import Any, List, Optional
 from groq import Groq
 
 from llm_eval.config import get_settings
-from llm_eval.judges.base import Judge, JudgeResult
+from llm_eval.judges.base import Judge
 from llm_eval.utils.logging import get_logger
 from llm_eval.utils.retry import retry_with_backoff
 

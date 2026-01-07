@@ -4,13 +4,12 @@ OpenAI GPT-4 Judge implementation.
 Provides LLM-as-a-Judge evaluation using OpenAI's GPT-4 model.
 """
 
-import os
 from typing import Any, List, Optional
 
 from openai import OpenAI
 
 from llm_eval.config import get_settings
-from llm_eval.judges.base import Judge, JudgeResult
+from llm_eval.judges.base import Judge
 from llm_eval.utils.logging import get_logger
 from llm_eval.utils.retry import retry_with_backoff
 

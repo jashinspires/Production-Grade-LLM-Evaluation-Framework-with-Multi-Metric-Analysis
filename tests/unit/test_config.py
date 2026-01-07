@@ -3,11 +3,9 @@ Unit tests for configuration system.
 """
 
 import json
-import tempfile
 from pathlib import Path
 
 import pytest
-import yaml
 
 from llm_eval.config import (
     EnvironmentSettings,
@@ -109,7 +107,7 @@ class TestEvaluationConfig:
         """Test that output directory is created."""
         output_dir = temp_dir / "new_output_dir"
 
-        config = EvaluationConfig(
+        EvaluationConfig(
             dataset_path=benchmark_file,
             output_dir=output_dir,
             models=[ModelConfig(name="test", output_path=model_output_file)],

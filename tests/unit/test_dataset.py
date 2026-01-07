@@ -4,7 +4,6 @@ Unit tests for dataset loader.
 
 import csv
 import json
-from pathlib import Path
 
 import pytest
 

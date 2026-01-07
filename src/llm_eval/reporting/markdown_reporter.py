@@ -86,7 +86,7 @@ class MarkdownReporter:
         lines.append(f"# LLM Evaluation Report: {model_name}")
         lines.append("")
         lines.append(f"**Generated**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        lines.append(f"**Framework Version**: 1.0.0")
+        lines.append("**Framework Version**: 1.0.0")
         lines.append("")
 
         # Collect metric statistics

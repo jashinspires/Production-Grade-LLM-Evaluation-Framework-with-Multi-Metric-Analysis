@@ -8,8 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from llm_eval.judges import create_judge
-from llm_eval.judges.anthropic_judge import AnthropicJudge
-from llm_eval.judges.base import DEFAULT_RUBRIC, Judge, JudgeResult
+from llm_eval.judges.base import Judge, JudgeResult
 from llm_eval.judges.groq_judge import GroqJudge
 from llm_eval.judges.openai_judge import OpenAIJudge
 

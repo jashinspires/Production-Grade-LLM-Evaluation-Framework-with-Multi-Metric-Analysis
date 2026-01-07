@@ -16,8 +16,8 @@ from llm_eval.dataset import (
     ModelOutput,
     match_outputs_to_benchmark,
 )
-from llm_eval.judges import Judge, JudgeResult, create_judge
-from llm_eval.metrics import Metric, MetricFactory, MetricResult
+from llm_eval.judges import Judge, create_judge
+from llm_eval.metrics import Metric, MetricFactory
 from llm_eval.reporting import JSONReporter, MarkdownReporter, Visualizer
 from llm_eval.utils.logging import get_logger
 

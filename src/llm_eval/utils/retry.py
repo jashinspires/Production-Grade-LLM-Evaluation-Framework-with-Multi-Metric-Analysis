@@ -8,7 +8,7 @@ in API-based metrics and LLM judge calls.
 import random
 import time
 from functools import wraps
-from typing import Any, Callable, Optional, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Optional, Tuple, Type, TypeVar
 
 from tenacity import (
     before_sleep_log,

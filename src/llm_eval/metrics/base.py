@@ -6,7 +6,7 @@ All metric implementations should extend from Metric class.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional, Type
 
 
 @dataclass
