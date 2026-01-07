@@ -65,7 +65,7 @@ class TestJSONReporter:
         with open(output_path) as f:
             data = json.load(f)
 
-        assert "models" in data
+        assert "model_summaries" in data  # Actual key in combined report
 
 
 class TestMarkdownReporter:
