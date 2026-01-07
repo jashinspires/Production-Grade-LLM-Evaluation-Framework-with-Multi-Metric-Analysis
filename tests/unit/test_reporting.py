@@ -3,9 +3,6 @@ Unit tests for reporting modules.
 """
 
 import json
-from pathlib import Path
-
-import pytest
 
 from llm_eval.reporting.json_reporter import JSONReporter
 from llm_eval.reporting.markdown_reporter import MarkdownReporter

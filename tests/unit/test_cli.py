@@ -2,10 +2,6 @@
 Unit tests for CLI interface.
 """
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
 from typer.testing import CliRunner
 
 from llm_eval.cli import app
