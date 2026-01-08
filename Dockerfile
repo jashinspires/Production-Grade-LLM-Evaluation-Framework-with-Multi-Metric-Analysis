@@ -49,7 +49,7 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY src/ ./src/
 COPY benchmarks/ ./benchmarks/
 COPY examples/ ./examples/
-COPY pyproject.toml ./
+COPY README.md pyproject.toml ./
 
 # Install the package without build dependencies (use --no-build-isolation)
 RUN pip install --no-build-isolation --no-deps -e .
