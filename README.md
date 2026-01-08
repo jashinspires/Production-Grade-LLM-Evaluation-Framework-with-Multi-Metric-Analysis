@@ -17,29 +17,25 @@ Think about it. You ask GPT-4 a question, it gives you an answer. Sounds reasona
 
 Most people just... read the answer and think "yeah, that looks right." But here's the thing — that doesn't scale. When you have thousands of queries, you can't manually check each one. You need a system.
 
-That's what this project does.
+That's what this framework does.
 
 ---
 
-## The Problem That Started It All
+## The Challenge
 
-When I started building RAG systems, I ran into something frustrating:
+This project was built as part of a production-grade ML engineering assignment. The goal: create a comprehensive LLM evaluation framework that goes beyond simple metrics.
 
-> **My model sounded confident while being completely wrong.**
+The core problem this addresses:
 
-It's called *hallucination*. The model generates fluent, convincing text that has nothing to do with reality. And the scary part? The metrics I was using didn't catch it.
+> **Models can sound confident while being completely wrong.**
 
-I tried BLEU score. It just counts word overlap. My model could copy random words from the reference and score high — even when the answer was nonsense.
+It's called *hallucination*. The model generates fluent, convincing text that has nothing to do with reality. And basic metrics like BLEU and ROUGE don't catch it — they just count word overlap.
 
-ROUGE? Same problem.
-
-I realized something: **I was measuring the wrong things.**
+This framework addresses that by measuring **multiple dimensions** of quality.
 
 ---
 
-## The Insight That Changed Everything
-
-Here's what I figured out after a lot of trial and error:
+## The Multi-Dimensional Approach
 
 **Evaluating LLMs isn't a single-number problem. It's a multi-dimensional problem.**
 
@@ -49,7 +45,7 @@ Think about what can go wrong with a model's answer:
 - It could **sound good but be made up** (not grounded in sources)
 - It could answer **a different question** than what was asked
 
-No single metric catches all of these. So I built a system that uses **six different lenses**:
+No single metric catches all of these. So this framework uses **six different lenses**:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -69,9 +65,9 @@ No single metric catches all of these. So I built a system that uses **six diffe
 
 ---
 
-## Why I Chose These Specific Metrics
+## Why These Specific Metrics
 
-This wasn't random. Each metric was chosen because it catches something the others miss:
+Each metric was chosen because it catches something the others miss:
 
 | Metric | Why I included it | What it catches that others don't |
 |--------|-------------------|-----------------------------------|
@@ -82,15 +78,15 @@ This wasn't random. Each metric was chosen because it catches something the othe
 | **Context Relevancy** | Catches retrieval failures | Did we even fetch the right documents? |
 | **Answer Relevancy** | The "did you answer MY question" check | Model answered correctly... but wrong question |
 
-I spent a lot of time deciding whether to include semantic similarity metrics. The trade-off: they're slower (need to load neural models) but much more accurate. I decided the accuracy was worth the speed hit — especially for evaluation, where you're not running in real-time.
+The trade-off with semantic similarity metrics: they're slower (need to load neural models) but much more accurate. The accuracy is worth the speed hit — especially for evaluation, where you're not running in real-time.
 
 ---
 
-## The Design Decisions Behind This
+## Key Design Decisions
 
 ### Decision 1: Factory Pattern for Metrics
 
-I wanted anyone to be able to add their own metrics easily. So I built a factory pattern:
+The framework is designed so anyone can add their own metrics easily using a factory pattern:
 
 ```python
 MetricFactory.register("my_metric", MyMetricClass)
@@ -100,21 +96,21 @@ One line to register, and your metric works everywhere — CLI, pipeline, report
 
 ### Decision 2: Pydantic for Configuration
 
-I could have just used a dictionary. But I chose Pydantic because:
+Why Pydantic instead of plain dictionaries?
 - It validates config files *before* running (fail fast)
 - Error messages tell you exactly what's wrong
 - Type hints work in IDEs (autocomplete, documentation)
 
-This saved me hours of debugging "why isn't this working" — the config validation catches problems immediately.
+This catches configuration problems immediately rather than failing deep in the evaluation.
 
 ### Decision 3: LLM-as-a-Judge with Multiple Providers
 
-I needed LLM-based evaluation, but I didn't want to be locked into OpenAI's pricing. So I built support for:
+To avoid vendor lock-in, the framework supports:
 - **OpenAI** (GPT-4) — highest quality
 - **Anthropic** (Claude) — good alternative
 - **Groq** (Llama) — free tier available!
 
-The key insight: use the same prompt and rubric across providers, so results are comparable.
+The same prompt and rubric work across providers, so results are comparable.
 
 ### Decision 4: Retry Logic with Exponential Backoff
 
@@ -130,9 +126,9 @@ This sounds simple but makes the difference between a toy project and something 
 
 ---
 
-## What Makes This Different
+## What Makes This Framework Different
 
-I looked at existing evaluation tools before building this. Here's what I found and why I built something different:
+Comparison with typical approaches:
 
 | Existing approach | The problem | What I did differently |
 |-------------------|-------------|------------------------|
