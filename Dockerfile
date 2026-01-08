@@ -1,6 +1,6 @@
 # LLM Evaluation Framework - Multi-stage Dockerfile
 # Build stage for dependencies
-FROM python:3.11-slim as builder
+FROM python:3.11-slim AS builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -28,7 +28,7 @@ RUN poetry config virtualenvs.create false \
     && poetry install --no-interaction --no-ansi --no-root --only main
 
 # Production stage
-FROM python:3.11-slim as production
+FROM python:3.11-slim AS production
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -49,11 +49,10 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY src/ ./src/
 COPY benchmarks/ ./benchmarks/
 COPY examples/ ./examples/
-COPY tests/ ./tests/
 COPY pyproject.toml ./
 
-# Install the package
-RUN pip install -e . --no-deps
+# Install the package without build dependencies (use --no-build-isolation)
+RUN pip install --no-build-isolation --no-deps -e .
 
 # Download NLTK data
 RUN python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab')"
@@ -72,7 +71,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 CMD ["llm-eval", "--help"]
 
 # Development stage
-FROM production as development
+FROM production AS development
 
 # Switch back to root to install dev dependencies
 USER root

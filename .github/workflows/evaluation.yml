@@ -158,7 +158,7 @@ jobs:
           poetry run llm-eval run \
             --config examples/config.yaml \
             --output-dir results/ \
-            --metrics bleu rouge_l bertscore faithfulness context_relevancy answer_relevancy \
+            --metrics bleu,rouge_l,bertscore,faithfulness,context_relevancy,answer_relevancy \
             --no-progress
       
       - name: Upload evaluation results

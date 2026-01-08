@@ -186,7 +186,7 @@ The goal was: **run one command, get everything you need to evaluate your model.
 - **Testability**: I can test each layer independently with mocks
 - **Extensibility**: Add a new metric? Just implement the interface. Add a new report format? Same thing.
 
-This is the kind of architecture you see in production systems — not because it's fancy, but because it actually makes the code maintainable.
+This is the kind of architecture you see in production systems - not because it's fancy, but because it actually makes the code maintainable.
 
 ---
 
